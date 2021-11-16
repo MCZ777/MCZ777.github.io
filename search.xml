@@ -4,6 +4,35 @@
   
     
     <entry>
+      <title>Seq2SQL阅读笔记</title>
+      <link href="/2021/11/16/Seq2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+      <url>/2021/11/16/Seq2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<h2 id="Seq2SQL"><a href="#Seq2SQL" class="headerlink" title="Seq2SQL"></a>Seq2SQL</h2><p>将生成的SQL语句分为三个部分：聚合操作Aggregation（SUM、COUNT、MIN、MAX等）；SELECT：选取列；WHERE：查询条件。</p><p>首先对query的聚合操作进行分类，并添加一个空操作符表示无聚合。接着指向输入表中对应于SELECT列的一列。最后通过pointer network生成SQL查询语句。</p><h3 id="聚合操作"><a href="#聚合操作" class="headerlink" title="聚合操作"></a>聚合操作</h3><p><strong>聚合操作的选择取决于问题</strong>。采用注意力机制进行分类。$ a_t^{inp}=W^{inp}h_t^{enc} $,代表输入序列的第t个token的注意力得分，权重矩阵与第t个token的输入编码乘积。归一化总的注意力得分，$ B^{inp}=softmax(a^{inp})$。输入表示$k^{agg}$是由归一化分数$B^{inp}$加权的输入编码$h^{enc}$之和。</p><script type="math/tex; mode=display">k^{agg}=\sum_tB_t^{inp}h_t^{enc}</script><p>$a^{agg}$表示聚合操作的得分，如COUNT，MIN，MAX和无聚合操作NULL。通过对输入表示$k^{agg}$应用多层感知机（MLP）来计算$a^{agg}$。</p><script type="math/tex; mode=display">a^{agg}=W^{agg}tanh(V^{agg}k^{agg}+b^{agg})+c^{agg}</script><p>最后通过softmax函数获取预测出的聚合操作$B^{agg}=softmax(a^{agg})$。</p><h2 id="SELECT-列"><a href="#SELECT-列" class="headerlink" title="SELECT 列"></a>SELECT 列</h2><p><strong>选择列取决于表列和问题</strong>。给定列表示和问题表示的列表，选择与问题最匹配的列。</p><script type="math/tex; mode=display">h_c^{j,t}=LSTM(emb(x^c_{j,t}),h^c_{j,t-1})\\e_j^c=h^c_{j,T_j}</script><p>$h_{j,t}^c$表示第j列的第t个encoder状态。将最后一个encoder状态设为$e_j^c$。</p><script type="math/tex; mode=display">a_j^{sel}=W^{sel}tanh(V^{sel}k^{sel}+V^ce_j^c)\\B^{sel}=softmax(a^{sel})</script><p>$k^{sel}$的构造与$k^{agg}$一样，但使用了不附带条件的权重。</p><h2 id="WHERE-子句"><a href="#WHERE-子句" class="headerlink" title="WHERE 子句"></a>WHERE 子句</h2><p><strong>使用指针网络训练WHERE子句</strong>。但是对于很多查询语句来说，WHERE子句的写法并不唯一，条件可以交换顺序，例如：</p><p>SELECT name FROM insurance WHERE age &gt; 18 AND gender =“male”;</p><p>$SELECT$ name FROM insurance WHERE gender = “male”AND age &gt; 18;</p><p>这可能导致原本正确的输出被判断为错误的。于是作者提出利用强化学习基于查询结果来进行优化。在解码器部分，对可能的输出进行采样，产生若干个SQL语句，每一句表示为y=[y1, y2 … yT]，用打分函数对每一句进行打分：</p><script type="math/tex; mode=display">R(q(y),q_g)= = \begin{cases}-2 & q(y)不是有效的SQL语句 \\-1 & q(y)是有效的SQL语句但得到一个不正确答案\\+1 & q(y)是有效的SQL语句并且得到正确答案\end{cases}</script><p>loss是对可能的WHERE子句的负预期回报，$L^{whe}=-E_y{[R(q(y)),q_g]}$。</p><p><img src="https://gitee.com/MCZ777/pic/raw/master/img/202111161541254.png" alt="image-20211116105440662"></p><p>$p_y^{y_t}$表示在时间步t期间选择token$y_t$的概率。</p><h2 id="混合目标函数"><a href="#混合目标函数" class="headerlink" title="混合目标函数"></a>混合目标函数</h2><p>使用梯度下降法最小化目标函数$L=L^{agg}+L^{sel}+L^{whe}$。总梯度来自预测SELECT列的交叉损失、预测聚合操作的交叉损失以及策略学习的梯度的权重总和。</p><h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><p>Seq2SQL- Generating Structured Queries from Natural Language using Reinforcement Learning</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 论文阅读 </category>
+          
+          <category> Text2SQL </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 论文阅读 </tag>
+            
+            <tag> Text2SQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>用Pytorch实现自动写诗</title>
       <link href="/2021/11/02/%E7%94%A8Pytorch%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E5%86%99%E8%AF%97/"/>
       <url>/2021/11/02/%E7%94%A8Pytorch%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E5%86%99%E8%AF%97/</url>
@@ -85,9 +114,9 @@
       
         <tags>
             
-            <tag> NLP综述 </tag>
-            
             <tag> Text2SQL </tag>
+            
+            <tag> NLP综述 </tag>
             
         </tags>
       
@@ -130,9 +159,9 @@
       
       <categories>
           
-          <category> NLP经典模型 </category>
-          
           <category> 论文阅读 </category>
+          
+          <category> NLP经典模型 </category>
           
       </categories>
       

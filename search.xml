@@ -29,6 +29,35 @@
     
     
     <entry>
+      <title>X-SQL阅读笔记</title>
+      <link href="/2021/12/04/X-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
+      <url>/2021/12/04/X-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</url>
+      
+        <content type="html"><![CDATA[<p><img src="https://gitee.com/MCZ777/pic/raw/master/img/202112041713303.png" alt="image-20211204171307209"></p><p>X-SQL使用BERT预训练模型的上下文输出增强结构化模式表示，并结合类型信息学习下游任务的新模式表示。</p><p>整个体系结构由三层组成：<strong>序列编码器</strong>，<strong>上下文增强模式编码器</strong>，<strong>输出层</strong>。</p><h1 id="序列编码器"><a href="#序列编码器" class="headerlink" title="序列编码器"></a>序列编码器</h1><p>X-SQL在序列编码器中使用类似于BERT结构的模型，但有以下不同：</p><ul><li>每个表架构都会附加一个特殊的空列[EMPTY]。</li><li>Segment embeddings被type embeddings取代，四种不同的类型分别是：问题，类别列，数值列和特殊的空列。</li><li>使用MT-DNN初始化编码器，并且把BERT中的<strong>[CLS]</strong>标识符改为<strong>[CTX]</strong>，为了强调上下文信息是在那里捕获的，而不是下游任务的表示。</li></ul><h1 id="上下文增强模式编码器"><a href="#上下文增强模式编码器" class="headerlink" title="上下文增强模式编码器"></a>上下文增强模式编码器</h1><p>编码器的输出形式为$h_{[CTX]},h_{q_1},…,h_{q_n},h_{[SEP]},h_{C_{11}},…,h_{[SEP]},h_{C_{21}},…,h_{[SEP]},…,h_{[EMPTY]},h_{[SEP]}$</p><p>每个问句中的token编码为$h_{q_i}$，数据库表中第i列的第j个token编码为$h_{C_{ij}}$。上下文增强模式编码器通过$h_{[CTX]}$捕捉的全局语境信息俩加强原始编码器的输出，从而为每一列i学习一个新的表示$h_{C_i}$。</p><script type="math/tex; mode=display">h _ { C _ { i } } = \sum _ { i = 1 } ^ { n _ { i } } \alpha _ { i } h C _ { i }  \tag{1}</script><p>其中$\alpha_{it}=SOFTMAX(s_{it})$。对齐模型$s_{it}$表示第i列的第t个token与全局上下文的匹配程度。f使用简单点积。</p><script type="math/tex; mode=display">s _ { i t } = f ( U h _ { \operatorname { c t c t } x 1 } / \sqrt { d } , V h _ { C _ { i t } } / \sqrt { d } )</script><p>虽然在<strong>序列编码器</strong>的输出中捕获到一定程度的上下文，但是由于自注意力机制只集中于某些区域，因此这种影响是有限的。而<strong>[CTX]</strong>中捕获的全局上下文信息足够多样化，因此被用来补充<strong>序列编码器</strong>的模式表示。</p><h1 id="输出层"><a href="#输出层" class="headerlink" title="输出层"></a>输出层</h1><p>该任务被分解为6个子任务，每个子任务预测最终SQL程序的一部分。</p><p>首先引入一个任务相关的子网络，它使用上下文$h_{CTX}$调节模式表示$h_{Ci}$。</p><script type="math/tex; mode=display">r _ { C _ { i } } = \operatorname{LayerNorm}  ( U ^ { \prime } h _ { [ c r x ] } + V ^ { \prime } h _ { C _ { i } } ) \tag{2}</script><blockquote><p>与公式1不同的是，此计算是针对每个子任务单独完成的，以便更好的将模式表示与每个子任务应关注的自然语言问句中的特定部分对齐。</p></blockquote><p><strong>S-COL</strong>：预测SELECT子句的列。S-COL只依赖于$r_{Ci}$。</p><script type="math/tex; mode=display">p ^ { s - C O L } ( C _ { i } ) = \operatorname {SOFTMAX} ( W ^ { S - C O L } r _ { C _ { i } } )</script><p><strong>S-AGG</strong>：预测SELECT选择的列的聚合器。为了增强聚合器依赖于所选列类型的直觉（例如MIN聚合器不使用字符串类型的列），显式地将列类型嵌入添加到模型中。</p><script type="math/tex; mode=display">p ^ { S-AGG} ( A_ { j } | C _ { i } ) = \operatorname { SOFTMAX} ( W ^ { S- A G G } [j,:] \times \\ \tag{3}\operatorname{LayerNorm}( U ^ { \prime \prime } h_{CTX} + V ^ { \prime \prime } h c _ { i } + E ^ T _{C_i})</script><p><strong>W-NUM</strong>：使用$ W ^ { W - N U M } h _ { [ C T X ] } $查找WHERE子句的数量，建模为四分类，每个标签代表最终SQL的1到4个WHERE子句。无法预测空WHERE子句的情况，空WHERE子句通过K-L散度由W-COL解决。</p><p><strong>W-COL</strong>：基于W-NUM预测的数量，为WHERE子句选择得分最高的列。</p><script type="math/tex; mode=display">p ^ { W-C O L } ( C _ { i } ) = \operatorname {SOFTMAX} ( W ^ { W-C O L } r_{C_i})</script><p><strong>W-OP</strong>：为给定的WHERE列选择最可能的操作符。</p><script type="math/tex; mode=display">P^{W-OP}(O_j|C_i) = \operatorname{SOFTMAX}(W^{W-OP}[j,:]r_{C_i})</script><p><strong>W-VAL</strong>：WHERE子句的预测值。从问句中预测一段文本，简单的预测span的开始和结束位置。</p><script type="math/tex; mode=display">p_{start}^{W-VAL}(q_j|C_i)= \operatorname{SOFTMAX} g(U^{start}h_{q_j}+V^{start}r_{C_i}) \\\\p_{end}^{W-VAL}(q_j|C_i)= \operatorname{SOFTMAX} g(U^{end}h_{q_j}+V^{end}r_{C_i})\\\\其中：g(x):=Wx+b</script><h1 id="训练和推理"><a href="#训练和推理" class="headerlink" title="训练和推理"></a>训练和推理</h1><p>在训练期间，优化目标是单个子任务损失的总和。任务S-COL、S-AGG、W-NUM、W-OP和W-VAL使用交叉熵损失，W-COL的损失定义为$D(Q||P^{W-COL})$之间的KL散度。基本事实Q的分布计算如下：</p><ul><li>如果没有WHERE子句，$Q_{[EMPTY]}$接收特殊列[EMPTY]的概率为1。</li><li>对于n ≥ 1个WHERE子句，每个WHERE列接收概率为$\frac{1}{n}$。</li></ul><p>如果得分最高的列是特殊列[EMPTY]，我们忽略W-NUM的输出并返回空的WHERE子句。否则，选择前W-NUM个W-COL中的非[EMPTY]列。</p><h1 id="实验结果"><a href="#实验结果" class="headerlink" title="实验结果"></a>实验结果</h1><p>使用WikiSQL数据集的默认train/dev/test拆分。评价标准是逻辑形式准确性（SQL 查询的精确匹配）和执行准确性（预测的 SQL 查询导致正确答案的比率）。逻辑形式准确性是我们在训练期间优化的指标。</p><ul><li>不同方法在推理期间应用和不应用执行指导(EG)的结果</li></ul><p><img src="https://gitee.com/MCZ777/pic/raw/master/img/202203121609965.png" alt="image-20220312160906924"></p><blockquote><p>在没有EG的情况下，X-SQL在逻辑形式准确性方面提供了2.6%的绝对改进(83.3对80.7)，在测试集上执行准确性方面提供了2.5%的改进。</p><p>即使有了EG，X-SQL在逻辑形式精度上还是好了2.4%，在执行精度上也是好了2.2%。值得注意的是，X-SQL+EG是第一个在测试集上超过90%准确率的模型。</p><p>根据Hwang等人(2019年)的说法，对于开发集，人类性能估计为88.2%。XSQL是第一个在没有执行指导的帮助下，比人类表现更好的模型。</p></blockquote><ul><li>不同方法的每个子任务的准确性</li></ul><p><img src="https://gitee.com/MCZ777/pic/raw/master/img/202203121614887.png" alt="image-20220312161455853"></p><blockquote><p>任务W-COL在没有EG的情况下显示了1.1%的绝对增益，在有EG的情况下显示了1.7%的绝对增益。将此归因于我们使用<strong>KL散度</strong>将where列预测形式化为列表排序问题的新方法。</p><p>另一个显著的改进是W-VAL任务，没有EG时的绝对增益为1.2%，有EG时的绝对增益为2.0%。这部分是由于列集预测(即W-COL)的改进，因为值生成高度依赖于where子句的预测列集。</p></blockquote><h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>提出一个新的模型X-SQL，展示了它在WikiSQL任务上的出色性能，并在所有指标上实现了新的最先进水平。虽然围绕损失目标的贡献可能受到WikiSQL使用的特定SQL语法的限制，但如何利用上下文信息以及如何使用模式类型可以立即应用于涉及结构化数据的预训练语言模型的其他任务。未来的工作包括试验更复杂的数据集，如Spider (Y u et al., 2018b)。</p><h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a href="https://www.microsoft.com/en-us/research/publication/x-sql-reinforce-context-into-schema-representation/#:~:text=X-SQL proposes to enhance the structural schema representation,WikiSQL dataset and show its new state-of-the-art performance.">X-SQL: reinforce schema representation with context - Microsoft Research</a></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 论文阅读 </category>
+          
+          <category> Text2SQL </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 论文阅读 </tag>
+            
+            <tag> Text2SQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>TypeSQL阅读笔记</title>
       <link href="/2021/11/29/TypeSQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"/>
       <url>/2021/11/29/TypeSQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</url>

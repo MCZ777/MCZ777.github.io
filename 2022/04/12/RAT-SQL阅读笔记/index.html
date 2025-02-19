@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RAT-SQL阅读笔记 | 养猫的少年~</title><meta name="keywords" content="-[论文阅读] -[Text2SQL]"><meta name="author" content="MCZ"><meta name="copyright" content="MCZ"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本篇论文研究的问题是：当把自然语言问题翻译成SQL查询，从数据库中搜集数据来回答问题时，现在语义解析模型很难泛化到未见过的数据库模式上。主要的泛化挑战有两个：1、语义parser对数据库关系进行可访问的编码，2、对数据库表列和它们在给定查询问题中的提及进行对齐建模。针对这两个挑战，作者提出了一个统一的框架，基于关系感知的self-attention机制，以解决模式编码、模式链接以及text2sq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAT-SQL阅读笔记">
+<meta property="og:url" content="https://mcz777.github.io/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="养猫的少年~">
+<meta property="og:description" content="本篇论文研究的问题是：当把自然语言问题翻译成SQL查询，从数据库中搜集数据来回答问题时，现在语义解析模型很难泛化到未见过的数据库模式上。主要的泛化挑战有两个：1、语义parser对数据库关系进行可访问的编码，2、对数据库表列和它们在给定查询问题中的提及进行对齐建模。针对这两个挑战，作者提出了一个统一的框架，基于关系感知的self-attention机制，以解决模式编码、模式链接以及text2sq">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg">
+<meta property="article:published_time" content="2022-04-12T01:51:14.000Z">
+<meta property="article:modified_time" content="2022-04-12T13:42:38.900Z">
+<meta property="article:author" content="MCZ">
+<meta property="article:tag" content="-[论文阅读] -[Text2SQL]">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mcz777.github.io/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'RAT-SQL阅读笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-04-12 21:42:38'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">养猫的少年~</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">RAT-SQL阅读笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-04-12T01:51:14.000Z" title="发表于 2022-04-12 09:51:14">2022-04-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-04-12T13:42:38.900Z" title="更新于 2022-04-12 21:42:38">2022-04-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Text2SQL/">-[论文阅读] -[Text2SQL]</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>12分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="RAT-SQL阅读笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><blockquote>
+<p>本篇论文研究的问题是：当把自然语言问题翻译成SQL查询，从数据库中搜集数据来回答问题时，现在语义解析模型很难泛化到未见过的数据库模式上。主要的泛化挑战有两个：1、语义parser对数据库关系进行可访问的编码，2、对数据库表列和它们在给定查询问题中的提及进行对齐建模。针对这两个挑战，作者提出了一个统一的框架，基于关系感知的self-attention机制，以解决模式编码、模式链接以及text2sql编码器中的特征表示。作者把这个框架应用到Spider数据集上，取得了57.2% exact match accuracy，在当时实现了SOTA。和BERT一起用，达到了65.6%。此外，最重要的是 模型在对模式链接和对齐的理解上有了质的提高。</p>
+</blockquote>
+<p>论文地址：ACL2020 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1911.04942">RAT-SQL: Relation-Aware Schema Encoding and Linking for Text-to-SQL Parsers </a></p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/Microsoft/rat-sql">rat-sql</a></p>
+<h1 id="1、现有的方案"><a href="#1、现有的方案" class="headerlink" title="1、现有的方案"></a>1、现有的方案</h1><p>现有的方案：由于text2sql是一个seq2seq的任务，utterance translation to sql query，所以研究的论文的点主要有：</p>
+<ul>
+<li>针对encoder编码器的优化</li>
+<li>生成sql解码器的优化</li>
+<li>查询语言和sql之间的差异，使用formal language（形式化查询语言），来更好的对齐查询语言和sql语句</li>
+<li>Encoder embedding的预训练</li>
+<li>Decoder的预训练</li>
+</ul>
+<p>本文的方案：这篇论文主要的工作是encoder部分优化。</p>
+<h1 id="2、提出问题"><a href="#2、提出问题" class="headerlink" title="2、提出问题"></a>2、提出问题</h1><p>论文首先就<strong>Schema Encoding</strong>和<strong>Schema Linking</strong>进行了介绍。Schema Encoding顾名思义就是对表结构（表名、列名、列类型、主键、外键等等）进行编码，以便后续模型训练使用。Schema Linking则是要把Question中表述的内容与具体的表名和列名对齐。</p>
+<p>由于spider数据集的train、test是没有重叠部分，所以是zero shot的预测，这种情况下，模型对schema的泛化能力就至关重要了。</p>
+<p>这个泛化问题的挑战主要有三方面：</p>
+<ul>
+<li>任何Text-to-SQL解析模型都必须将模式编码为适合于解码可能涉及给定列或表的SQL查询的表示形式。</li>
+<li>这些表示应该编码schema模式的所有信息，比如它的column types列类型、外键关系和用于数据库连接的主键。</li>
+<li>该模型必须能识别用于指代列和表的查询语言，这可能与训练中看到的参考语言有所不同，也就是模型得有 schema linking 能力（schema linking： 可以把问题中提到的实体引用与预期的模式列或表很好的对齐）</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121027488.png" alt="image-20220412102717411"></p>
+<p>图1解释了在linking时存在ambiguity 的情况，问题中的<em>“model”指的是</em> car_names.model 而不是 model_list.model；为了解决ambiguity 的情况，the semantic parser 需要同时考虑 schema relations 和语义信息。</p>
+<p>之前的工作<a target="_blank" rel="noopener" href="https://www.aclweb.org/anthology/P19-1448/">GNN encoder</a>使用图神经网络，主要是用有向图来表示外键之间的关系，但是这种方法有两个缺点：</p>
+<ol>
+<li>没有将schema与question结合起来编码，因此，在列和问题词被表示之后（这里的表示主要是embedding词向量和schema的一些内容），对schema linking模式链接的推理会变得很困难</li>
+<li>将模式编码期间的信息传播限制在预定义的外键关系图中，这就没有考虑全局信息，之前的研究中已经证明全局信息对有效的表示结构关系非常重要。</li>
+</ol>
+<p>这篇论文提出的RAT-SQL方案，是对数据库schema 和 问题question的关系结构有效编码；它使用 relation-aware self-attention （关系感知的self-attention <a target="_blank" rel="noopener" href="https://aclanthology.org/N18-2074/">Self-Attention with Relative Position Representations - ACL Anthology</a>），把 schema entities 模式实体和问题词的全局推理，与对预定义模式关系的结构化推理 结合了起来。通过实验证明，RAT-SQL能够建立更准确的问题与模式列和表的真实对齐的内部表示。</p>
+<h1 id="3、Relation-Aware-Self-Attention"><a href="#3、Relation-Aware-Self-Attention" class="headerlink" title="3、Relation-Aware Self-Attention"></a>3、Relation-Aware Self-Attention</h1><p>Transformer结构是一系列self-attention layers的叠加。考虑 $x_i$为输入，self-attention layer的输出为 $y_i$。每一层的处理过程如下。其中FC为全连接层，LayerNorm是进行normalization。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121606192.png" alt="image-20220412160634148"></p>
+<p>从Transformer架构理解，$e_{ij}$为$x_i$的query vector与$x_j$的key vector的点积得分；$\alpha_{ij}$为$x_i$对不同词向量的注意力权重；$z_i$为$x_i$的自注意力输出。普通Transformer结构擅长学习到不同$x_i$之间的关系，但如果$x_i$之间有预先定义好的关联关系，就无法表示出。</p>
+<p>Shaw et al. (2018)提出了relation-aware self-attention的方法。即关系感知的自注意力，这是一个对半结构化输入序列embedding的模型，它联合编码了输入中预先存在的关系结构，以及同一嵌入中序列元素之间的诱导 “软 “关系。schema 的 embedding和 linking 自然而然作为一个feature。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121618939.png" alt="image-20220412161825903"></p>
+<p>RAT-SQL基于此进行了进一步的引申，使得该Transformer结构可以表示任意的关系信息。$r_{ij}$表示两个输入元素$x_i$和$x_j$的已知关系编码，定义$r_{ij}^K=r_{ij}^V=Concat(\rho_{ij}^{(1)},…,\rho_{ij}^{(R)})$。<strong>其中假设有R个关系对，而$\rho_{ij}^{(s)}$为通过学习得到的对关系$R^{(s)}$的向量表示</strong>。部分关系如下表：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121633863.png" alt="image-20220412163331799"></p>
+<h1 id="4、RAT-SQL"><a href="#4、RAT-SQL" class="headerlink" title="4、RAT-SQL"></a>4、RAT-SQL</h1><p>模型结构示意图如下，分为encoding和decoding两个阶段，下面分步解释。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121658306.jpg" alt="RAT-SQL"></p>
+<h2 id="4-1-构造Graph-G-Q"><a href="#4-1-构造Graph-G-Q" class="headerlink" title="4.1 构造Graph $G_Q$"></a>4.1 构造Graph $G_Q$</h2><p>图顶点集合 $V_Q$ 由三部分组成：column names，table names以及question words。对于column，同时在顶点label中加入column type。</p>
+<p>这里需要注意的是，有的列是主键，有的是外键，列的type有NUMBER和TEXT。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121701737.png" alt="image-20220412170155683"></p>
+<p>本文使用有向图来表示数据库schema，node节点包括表和列，表的label是表名单词，列字段的label会在列单词前加type，边是数据库已经定义的关系。</p>
+<blockquote>
+<p>这里需要注意的：图对已有信息都覆盖了，但是对那些没见过的schema就不能精确编码了。所以，本文希望通过联合学习question和schema来让模型掌握这种能力，能够对已有信息未见过的schema精确编码。因此，作者定义了一个新的图：question-contextualized schema graph ：node包括question words， 边是已知schema 边 + question words 和 schema 的 特殊关系（完全匹配、部分匹配）</p>
+</blockquote>
+<p>图的边集合$E_Q$由三部分组成：首先是Database Schema所定义的表连接关系，table和column的包含关系等等；其次是通过schema linking得到的question和schema之间的对应关系；最后是为辅助relation-aware self-attention而定义的Auxiliary Relations。各种edges的类型整理如下图，具体定义请参考论文。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121704259.jpg" alt="v2-2ac086a4d53aa0b68cccdb50b10e04a1_r"></p>
+<h2 id="4-2-Relation-Aware-Input-Encoding"><a href="#4-2-Relation-Aware-Input-Encoding" class="headerlink" title="4.2 Relation-Aware Input Encoding"></a>4.2 Relation-Aware Input Encoding</h2><p>针对每个表、列节点，作者这里使用了glove的embedding来获得词向量，并用BiLSTM来处理词向量，并用另外独立的BiLSTM来获取question的embedding</p>
+<p>输入X是所有节点表示的集合：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121707311.png" alt="image-20220412170610001"></p>
+<p>这里的encoder会堆叠多层的Relation-aware self-attention层，最后将第N层的输出作为编码器的最终输出。</p>
+<p>同时，论文也使用预训练模型BERT来获取初始节点Embedding。同时也添加了许多附加关系，使得节点之间两两互有关系，构成一个<strong>完全图</strong>。</p>
+<h2 id="4-3-Schema-Linking"><a href="#4-3-Schema-Linking" class="headerlink" title="4.3 Schema Linking"></a>4.3 Schema Linking</h2><blockquote>
+<p>由于我们的输入是一张张图，图的边包括已存在主外键关系，这里我们需要构建问题中提到的词与数据库中已存在的表、列（字段）的边。这里的关系有两种：1、匹配的名称（ matching names ）；2、匹配的列的值（matching values）</p>
+</blockquote>
+<p><strong>Name-based linking</strong>：包含完全匹配和部分匹配；完全匹配就是字符串和数据库的表列名完全相同，部分匹配是字符串只是表列名的子集。这里使用N-Gram进行匹配，当然效果是很差的。</p>
+<p><strong>Value-based Linking</strong>：主要是确定question中的某个词是否是数据库表中某列的一个值。这对于模型的表现提升很大。这块其实比较难，因为列的值千变万化，且有的需要背景知识。（这块作者是说，将这块外包给数据库引擎来做，不需要将模型暴露给数据，通过数据库索引和文本搜索快速检索单词匹配，这里具体是如何？作者并没有解释清楚。）</p>
+<h2 id="4-4-Memory-Schema-Alignment-Matrix"><a href="#4-4-Memory-Schema-Alignment-Matrix" class="headerlink" title="4.4 Memory-Schema Alignment Matrix"></a>4.4 Memory-Schema Alignment Matrix</h2><p>一般出现在SQL句子中的表和列，一般在question中会提到相关的词语；为了验证，使用relation-aware 的attention来作为一个指针机制。使用Encoder最后一层的输出来计算一个alignment矩阵，用于可视化schema linking的对齐效果。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121730618.png" alt="image-20220412172954528"></p>
+<p>公式中的对齐矩阵应该类似于真实的离散对齐，所以需要尊重某些约束条件，如稀疏性，不过随着编码器被充分参数化后，稀疏性往往随着学习而产生，我们也可以使用一个明确的目标来鼓励它。</p>
+<blockquote>
+<p>（作者在附录中证明了，这个方式只在这个对齐方式，在早期的实验中可以帮助模型，后期对模型的performance没有帮助；或者在transformer层较少的时候有用）</p>
+</blockquote>
+<h2 id="4-5-Decoder"><a href="#4-5-Decoder" class="headerlink" title="4.5 Decoder"></a>4.5 Decoder</h2><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121736504.png" alt="image-20220412173635449"></p>
+<p>在encoder输出的向量之上通过使用LSTM输出一系列解码器动作来生成作为深度优先遍历顺序的抽象语法树AST（Abstract Syntax Tree）：</p>
+<ol>
+<li>将最后生成的节点扩展成一条语法规则，用APPLY RULE来生成基本结构；</li>
+<li>当完成一个叶子结点时，从schema中选择一个column或table。用SELECT TABLE或者SELECT COLUMN来完成table name或column name的选择填充。</li>
+<li>AST生成后，可进一步推断出最终的SQL query。</li>
+</ol>
+<blockquote>
+<p>详情参考论文： Pengcheng Yin and Graham Neubig. 2017. A Syntactic Neural Model for General-Purpose Code Generation. In <em>Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)</em>, pages 440–450.</p>
+</blockquote>
+<h1 id="5-实验"><a href="#5-实验" class="headerlink" title="5 实验"></a>5 实验</h1><p>作者对输入的文本做了lemmatized ，这个在做n-gram匹配时可以用得上；作者这里尝试了 4、6、8层的Rat-layers，本实验主要基于Spider、WikiSQl这两个数据集。</p>
+<h2 id="5-1-在Spider数据集上的结果"><a href="#5-1-在Spider数据集上的结果" class="headerlink" title="5.1 在Spider数据集上的结果"></a>5.1 在Spider数据集上的结果</h2><p>在Spider数据集上实验结果如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121739800.png" alt="image-20220412173908737"></p>
+<p>在各个难度子集上的结果如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121739777.png" alt="image-20220412173940728"></p>
+<p>同时，文章进行了消融实验Ablation Study，结果如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121740102.png" alt="image-20220412174007047"></p>
+<p><strong>结果显示使用了 schema-linking、graph-relation、value-linking会进一步提高表现。</strong></p>
+<h2 id="5-2-在WikiSQL数据集上的结果"><a href="#5-2-在WikiSQL数据集上的结果" class="headerlink" title="5.2 在WikiSQL数据集上的结果"></a>5.2 在WikiSQL数据集上的结果</h2><p>作者也尝试在WikiSQL数据集上进行了评估。实验结果如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121742394.png" alt="image-20220412174224358"></p>
+<p>可以看到，模型相比于WIkiSQL上一些单纯的”slot filling”的方法也取得了具有竞争性的表现。</p>
+<h1 id="6-讨论"><a href="#6-讨论" class="headerlink" title="6 讨论"></a>6 讨论</h1><h2 id="6-1-Alignment的作用"><a href="#6-1-Alignment的作用" class="headerlink" title="6.1 Alignment的作用"></a>6.1 Alignment的作用</h2><p>将question中对应的columns和tables识别出来，不仅仅是提升了SQL中对应columns/tables的准确率。这种对齐（alignment）还为question中其他部分的识别提供了一个良好的基准。如下图中，不只是question中“horsepower”被识别出与“column:horsepower”对应，同时整个word span “the largest horsepower”也被对齐到“column:horsepower”。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121746537.png" alt="image-20220412174647463"></p>
+<p>图中展示了模型对图1示例生成的对齐。可以看到查询问题和 表列的对齐效果；对于引用列的三个单词((“cylinders”, “model”, “horsepower”)，对齐矩阵正确地标识了它们对应的列，其他的词受到了这三个词很大的影响，导致稀疏的span-to-column对齐，例如“largest horsepower” 到 horsepower.。表cars_data和cars_names是由单词cars隐式提到的，所有被模型识别出来了，但cars_maker 却没有，说明模型在对齐上做的还算可以。</p>
+<h2 id="6-2-使用Schema-Linking的必要性"><a href="#6-2-使用Schema-Linking的必要性" class="headerlink" title="6.2 使用Schema Linking的必要性"></a>6.2 使用Schema Linking的必要性</h2><p>为了探讨模型选择了错误的表列的频率，作者做了一个oracle experiment（让模型中特定模块永远产出正确的结果然后再评估模型准确率）：在每一个语法非最终的终端，解码器被强迫选择正确的产生方式使得和ground truth完全匹配，后续的解码流程基于这个选择进行。结果如下图</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204121756986.png" alt="image-20220412175635934"></p>
+<p>这里的Oracle columns指的是总是给模型提供正确的table/column，Oracle sketch指的是给出正确的AST结构。可以看到，如果都可以正确给出，模型可以达到99.4的准确率，证明了模型中的语法基本可以覆盖所有的Spider中的例子。</p>
+<h2 id="6-3-误差分析"><a href="#6-3-误差分析" class="headerlink" title="6.3 误差分析"></a>6.3 误差分析</h2><p>主要有三种误差：</p>
+<ol>
+<li>18%的错误预测是因为SQL语法表达不同，而执行结果是正确的。（例如ORDER BY C LIMIT 1 vs.SELECT MIN(C)）</li>
+<li>39%的错误预测是因为SELECT 子句中的错误/缺失/多余的column。这是schema linking的一个限制，部分错误较难解决，因为一些questions中并未明确所需column。</li>
+<li>29%的错误是因为WHERE语句不完整。一个常见的例子是特定领域的措辞，例如“older than 21”，这需要背景知识将其映射到 age &gt; 21 而不是 age &lt; 21。此类错误在域内微调后消失。</li>
+</ol>
+<h1 id="创新点"><a href="#创新点" class="headerlink" title="创新点"></a>创新点</h1><p>RATSQL是ACL 2020上的一篇用于解决Spider数据集上Text-to-SQL问题的论文，后续的LGESQL也是在篇论文的基础上改进的。文章的主要创新点在于：</p>
+<ol>
+<li>在Encoder中加入relation-awareself-attention组成RAT层代替transformer层对输入进行encode，relation一共有33种，每两个单词之间都会有一个relation。利用schema linking同时把显式关系（schema）和隐式关系（question和schema之间的linking）都考虑在encoding中，完善了模型的表示能力。假设一共有R种不同的关系，rij可以定义为R个特征向量的拼接，对于每一种关系，如果xi和xj有这一关系，就将对应的特征向量作为参数进行学习，否则就置为零向量。</li>
+<li>构造Graph，图顶点集合Vq由三部分组成：column names，table names以及question words。对于column，同时在顶点label中加入column type。边集合Eq 由三部分组成：首先是Database Schema所定义的表连接关系，table和column的包含关系等等；其次是通过schema linking得到的question和schema之间的对应关系；最后是为辅助relation-aware self-attention而定义的Auxiliary Relations。</li>
+<li>在encoder输出的向量之上通过一系列的预测动作来构造AST（Abstract Syntax Tree）：首先，用APPLYRULE来生成基本结构；然后，用SELECTTABLE或者SELECTCOLUMN来完成table name或column name的选择填充。AST生成后，可进一步推断出最终的SQL query。</li>
+<li>在encoder最后一层计算一个对齐矩阵，用于可视化查看模型在question word和schema word之间的对齐效果。</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">MCZ</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://mcz777.github.io/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">https://mcz777.github.io/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://mcz777.github.io" target="_blank">养猫的少年~</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Text2SQL/">-[论文阅读] -[Text2SQL]</a></div><div class="post_share"><div class="social-share" data-image="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">LGESQL阅读笔记</div></div></a></div><div class="next-post pull-right"><a href="/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="next-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">IRNet阅读笔记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/12/04/X-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="X-SQL阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-04</div><div class="title">X-SQL阅读笔记</div></div></a></div><div><a href="/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="IRNet阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-29</div><div class="title">IRNet阅读笔记</div></div></a></div><div><a href="/2022/03/16/HydraNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="HydraNet阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-16</div><div class="title">HydraNet阅读笔记</div></div></a></div><div><a href="/2022/03/24/SyntaxSQLNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="SyntaxSQLNet阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202203291742486.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-24</div><div class="title">SyntaxSQLNet阅读笔记</div></div></a></div><div><a href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-05</div><div class="title">S2SQL阅读笔记</div></div></a></div><div><a href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-06</div><div class="title">BRIDGE阅读笔记</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">MCZ</div><div class="author-info__description">一个初学者</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mcz777"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/mcz777" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:mchangzhe@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://www.zhihu.com/people/mcz-2" target="_blank" title="Zhihu"><i class="fab fa-zhihu"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1%E3%80%81%E7%8E%B0%E6%9C%89%E7%9A%84%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">1、现有的方案</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2%E3%80%81%E6%8F%90%E5%87%BA%E9%97%AE%E9%A2%98"><span class="toc-number">2.</span> <span class="toc-text">2、提出问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3%E3%80%81Relation-Aware-Self-Attention"><span class="toc-number">3.</span> <span class="toc-text">3、Relation-Aware Self-Attention</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4%E3%80%81RAT-SQL"><span class="toc-number">4.</span> <span class="toc-text">4、RAT-SQL</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E6%9E%84%E9%80%A0Graph-G-Q"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 构造Graph $G_Q$</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-Relation-Aware-Input-Encoding"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 Relation-Aware Input Encoding</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-3-Schema-Linking"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 Schema Linking</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-4-Memory-Schema-Alignment-Matrix"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 Memory-Schema Alignment Matrix</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-5-Decoder"><span class="toc-number">4.5.</span> <span class="toc-text">4.5 Decoder</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%AE%9E%E9%AA%8C"><span class="toc-number">5.</span> <span class="toc-text">5 实验</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E5%9C%A8Spider%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%8A%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 在Spider数据集上的结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E5%9C%A8WikiSQL%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%8A%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 在WikiSQL数据集上的结果</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E8%AE%A8%E8%AE%BA"><span class="toc-number">6.</span> <span class="toc-text">6 讨论</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-Alignment%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 Alignment的作用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-%E4%BD%BF%E7%94%A8Schema-Linking%E7%9A%84%E5%BF%85%E8%A6%81%E6%80%A7"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 使用Schema Linking的必要性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-3-%E8%AF%AF%E5%B7%AE%E5%88%86%E6%9E%90"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 误差分析</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%88%9B%E6%96%B0%E7%82%B9"><span class="toc-number">7.</span> <span class="toc-text">创新点</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"/></a><div class="content"><a class="title" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题">服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题</a><time datetime="2025-02-19T10:26:15.000Z" title="发表于 2025-02-19 18:26:15">2025-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="BRIDGE阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记">BRIDGE阅读笔记</a><time datetime="2022-05-06T07:26:15.000Z" title="发表于 2022-05-06 15:26:15">2022-05-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="S2SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记">S2SQL阅读笔记</a><time datetime="2022-05-05T07:43:01.000Z" title="发表于 2022-05-05 15:43:01">2022-05-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LGESQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记">LGESQL阅读笔记</a><time datetime="2022-04-15T13:38:21.000Z" title="发表于 2022-04-15 21:38:21">2022-04-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RAT-SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记">RAT-SQL阅读笔记</a><time datetime="2022-04-12T01:51:14.000Z" title="发表于 2022-04-12 09:51:14">2022-04-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2025 By MCZ</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

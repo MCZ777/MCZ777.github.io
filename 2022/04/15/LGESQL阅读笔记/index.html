@@ -1,0 +1,381 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LGESQL阅读笔记 | 养猫的少年~</title><meta name="keywords" content="zh-CN"><meta name="author" content="MCZ"><meta name="copyright" content="MCZ"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="论文地址：ACL2021 LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations 代码地址：LGESQL 摘要这项工作旨在解决 Text-to-SQL 任务中具有挑战性的异构图（由不同成分组成的图）编码问题。以前的方法通常是以节点为中心，仅仅利用不同的权重矩阵来对边类型进行参数化，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LGESQL阅读笔记">
+<meta property="og:url" content="https://mcz777.github.io/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="养猫的少年~">
+<meta property="og:description" content="论文地址：ACL2021 LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations 代码地址：LGESQL 摘要这项工作旨在解决 Text-to-SQL 任务中具有挑战性的异构图（由不同成分组成的图）编码问题。以前的方法通常是以节点为中心，仅仅利用不同的权重矩阵来对边类型进行参数化，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg">
+<meta property="article:published_time" content="2022-04-15T13:38:21.000Z">
+<meta property="article:modified_time" content="2022-04-19T14:08:16.698Z">
+<meta property="article:author" content="MCZ">
+<meta property="article:tag" content="zh-CN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mcz777.github.io/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LGESQL阅读笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-04-19 22:08:16'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">养猫的少年~</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">LGESQL阅读笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-04-15T13:38:21.000Z" title="发表于 2022-04-15 21:38:21">2022-04-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-04-19T14:08:16.698Z" title="更新于 2022-04-19 22:08:16">2022-04-19</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="LGESQL阅读笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><strong>论文地址</strong>：ACL2021 <a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.01093v3">LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations</a></p>
+<p><strong>代码地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/rhythmcao/text2sql-lgesql">LGESQL</a></p>
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>这项工作旨在解决 <strong>Text-to-SQL</strong> 任务中具有挑战性的<strong>异构图</strong>（由不同成分组成的图）编码问题。以前的方法通常是以节点为中心，仅仅利用不同的权重矩阵来对边类型进行参数化，这些方法</p>
+<ul>
+<li>忽略了嵌入在边的拓扑结构中的丰富语义信息</li>
+<li>无法区分每个节点的局部和非局部关系</li>
+</ul>
+<p>为此，我们提出了一个 <strong>Line Graph Enhanced Text-SQL（LGESQL）</strong> 模型来挖掘底层的关系特征，而无需构建元路径。由于<strong>line graph</strong>的存在，信息不仅通过节点之间的连接，而且通过有向边的拓扑结构更有效地传播。此外，在图的迭代过程中，局部和非局部的关系都被不同程度地整合。我们还设计了一个辅助任务，叫做<strong>图修剪（graph pruning）</strong>，以提高<strong>Encoder</strong>的辨别能力。在撰写本报告时，我们的框架在跨领域文本到SQL基准的Spider上取得了 <strong>state-of-the-art</strong>（GLOVE为62.8%，ELECTRA为72.0%）。</p>
+<h1 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1. Introduction"></a>1. Introduction</h1><p><strong>Text-to-SQL</strong>任务旨在给出相应的数据库模式，将自然语言问题转换为SQL查询。它已经在学术界和工业界被广泛研究，以建立数据库的自然语言接口。</p>
+<p>一个艰巨的问题是如何联合编码<strong>问题</strong>和<strong>数据库模式</strong>（包括表和列），以及这些异质输入之间的<strong>各种关系</strong>。通常情况下，以前的文献利用以节点为中心的图形神经网络（GNN）来汇总相邻节点的信息，GNNSQL采用了关系图卷积网络（RGCN）来考虑模式项之间的不同边类型。</p>
+<p>然而，这些边特征是直接从一个固定大小的参数矩阵中获取的，可能会有一个缺点：不了解上下文信息，特别是边的结构拓扑。<strong>元路径（Meta-path ）</strong> 被定义为连接两个对象的组合关系，它可以用来捕捉多跳语义，举例：在图1(a)中，Q-exact match-C 和 C-belong to-T 可以形成一个2跳元路径，表示某个表T 有一个列C正好在问题Q中被提到。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204161630789.png" alt="image-20220416162953634"></p>
+<p>尽管<strong>RATSQL</strong>引入了一些有用的元路径，如 C-same table-C，但它处理所有的关系，无论是1跳还是多跳，都是以同样的方式（相对位置嵌入）表示在一个完整的图中。如果不区分<strong>局部</strong>（1跳邻居）和<strong>非局部</strong>邻居，见 图1(b)，每个节点将平等地关注所有其他节点，这可能导致过度平滑问题 (局部和非局部邻居应该被区别对待)。</p>
+<p>此外，元路径目前是由领域专家构建的，或者通过广度优先搜索进行探索。不幸的是，可能的元路径的数量随着路径长度的增加而呈指数级增长，在其中选择最重要的子集是一个<strong>NP-complete问题</strong>。</p>
+<p>为了解决上述限制，我们提出了一个 <strong>Line Graph Enhanced Text-SQL（LGESQL）</strong> 模型，它明确考虑了边的拓扑结构。根据 <strong>line graph</strong>（线型图） 的定义，我们首先从原来的<strong>以节点为中心</strong>的图中构建一个<strong>以边为中心</strong>的图，这两个图分别捕获节点和边的结构拓扑。</p>
+<p>两个图中的每个节点都从其邻域收集信息，并从<strong>双图</strong>中提取边缘特征来更新其表示。对于以节点为中心的图，我们将局部和非局部的边特征都纳入计算。局部边特征表示 <strong>1跳</strong> 关系，由 <strong>line graph</strong> 中的 <strong>node embeddings</strong> 动态 提供，而非局部边特征则直接从参数矩阵中提取，这种区别鼓励模型要更多地关注局部的边特征。</p>
+<h1 id="2-Preliminaries"><a href="#2-Preliminaries" class="headerlink" title="2. Preliminaries"></a>2. Preliminaries</h1><h2 id="2-1-Problem-definition"><a href="#2-1-Problem-definition" class="headerlink" title="2.1 Problem definition"></a>2.1 Problem definition</h2><p>整个输入节点为中心的异构图$G^n=(V^n,R^n)$由三种类型的节点组成，即$V^n=Q\cup T\cup U $</p>
+<ul>
+<li>其中，Q为问题，T为对应的数据库 <strong>schema</strong> 的Table，C 为 column，R 是边的类型</li>
+<li>$|V^n|$是节点总数，$|V^n|=|Q|+|T|+|C|$</li>
+</ul>
+<h2 id="2-2-Meta-path"><a href="#2-2-Meta-path" class="headerlink" title="2.2 Meta-path"></a>2.2 Meta-path</h2><p>如图所示，一个 meta-path 代表一个路径</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204181532969.png" alt="Meta-path"></p>
+<p>它在两个类型$\tau_1$和$\tau_2$ 的节点之间描述了一组复合关系 $r=r_1\circ r_2\cdots \circ r_l$ (即描述了两个节点之间存在的边的类型信息，边的类型包括 QUESTION，TABLE，COLUMN)。</p>
+<p>在本文的讨论中，我们使用 local 来表示长度为 <strong>1</strong> 的路径（局部路径），而长度 <strong>大于1</strong> 的路径为非局部路径。关系邻接矩阵$R^{n}$中包含局部关系和非局部关系。</p>
+<h2 id="2-3-Line-Graph"><a href="#2-3-Line-Graph" class="headerlink" title="2.3 Line Graph"></a>2.3 Line Graph</h2><p>离散数学里面的对偶图，把原图的边转换为节点，把节点转化为边，以边为中心的异构图。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192206102.png" alt="image-20220419220620033"></p>
+<p>如图所示，原始图中有1-5共5个节点和 ${(1, 2), (1, 3), \cdots\}$ 等多条边。现在我们构造<strong>Line Graph</strong>。首先将图中所有的边全部变成<strong>Line Graph</strong>中的一个节点，然后如果两条边同时接到了一个点上，比如 ( 1 , 2 ) 和 ( 1 , 3 ) 那么这两条边对应到<strong>Line Graph</strong>中的节点就连一条边。</p>
+<ul>
+<li><p>在 <strong>line graph</strong>$G^e=(V^e,R^e)$中的每一个节点$v_i^e,i=1,2,\dots,|V^e|$可以唯一映射到原始节点中心图$G^n=(V^n,R^n)$的一条有向边$r^n_{st}$，或者$v_{s}^{n}\to v_{t}^{n}$</p>
+</li>
+<li><p><strong>Function</strong> f 将源节点和目标节点的索引元组（s,t）映射到 line graph$G^e$中点的索引（相当于把$G^n$中两个节点之间的边映射到$G^{e}$中的节点），表示为 i = f(s,t)，反向映射表示为$f^{-1}$（相当于把$G^{e}$中的节点映射到$G^{n}$中的边）</p>
+</li>
+<li><p>在 <strong>line graph</strong> $G^{e}$中，如果$r^{n}_{f^{-1}(i)}$的 <strong>target node（目标节点）</strong>$v_{i}^{e}$的和 $r^{n}_{f^{-1}(j)}$的 <strong>source node（起始节点）</strong>$v_{j}^{e}$在原图$G^{n}$中都表示相同的节点，那么在线图$G^{e}$ 中，$v_{i}^{e}$和$v_{j}^{e}$之间就会存在一条有向边$r^{e}_{ij}$。</p>
+</li>
+<li><p>$r^e_{ij}$中包含了 <strong>meta-path</strong> $r^{n}_{f^{-1}(i)} \circ r^{n}_{f^{-1}(j)}$的信息（包含了原图中两个节点的信息 ）</p>
+</li>
+</ul>
+<p>我们防止回溯的情况，其中两个反向边不会在$G^e$中连接，如图所示</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204181557589.png" alt="image-20220418155708541"></p>
+<p>只使用$R^{n}$的局部关系作为 <strong>line graph</strong> $G^{e}$的节点集，避免在 <strong>line graph</strong> 中创建太多节点。对称的是，在<strong>line graph</strong>中$R^{e}$中的每条边，可以被唯一映射到原图中的节点集 $V^{n}$中，如下图</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204191844962.png" alt="在这里插入图片描述"></p>
+<h1 id="3-Method"><a href="#3-Method" class="headerlink" title="3. Method"></a>3. Method</h1><p>在构建了线图之后，我们利用经典的 <strong>encoder-decoer</strong> 结构为骨干作为我们的模型，LGESQL由三部分组成：</p>
+<ul>
+<li>graph input model（图形输入模块）</li>
+<li>line graph enhanced hidden module（线图增强隐藏层模块）</li>
+<li>graph output module（图形输出模块）</li>
+</ul>
+<p>前两个模块旨在将输入的异构图$G^{n}$映射成 <strong>node embeddings X</strong>，<strong>X</strong> 的维度是$|V^{n}| * d$，其中d是图的 hidden size。</p>
+<p><strong>图输出模块</strong>检索并将 X 转化为目标<strong>SQL查询y</strong>。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204191848087.png" alt="image-20220419184810002"></p>
+<h2 id="3-1-Graph-Input-Module"><a href="#3-1-Graph-Input-Module" class="headerlink" title="3.1 Graph Input Module"></a>3.1 Graph Input Module</h2><p>这一部分的模型是为了获取节点和边的<strong>初始表示</strong></p>
+<ul>
+<li>对于边，初始的<strong>局部</strong>的边特征$\mathbb{Z}^{0}\in \mathbb{R}^{|V^{e}|\times d}$以及<strong>非局部</strong>特征$\mathbb{Z}_{nlc}\in \mathbb{R}^{(|R^{n}|-|V^{e}|)\times d} $都是直接从参数矩阵获得的。</li>
+<li>对于节点，我们可以从<strong>GLOVE</strong>或者预训练的模型（PLM）如<strong>BERT</strong>中获取。</li>
+</ul>
+<h3 id="3-1-1-Glove"><a href="#3-1-1-Glove" class="headerlink" title="3.1.1 Glove"></a>3.1.1 Glove</h3><p>对于每个在<strong>question</strong>、<strong>table</strong>或<strong>column</strong>中的名称，使用Glove词向量时可以不考虑上下文直接在词典中拿到它们的embedding。然后将它们（这里的它们是指一个名称中包含的若干个word）按照所属部分（即是属于question，还是table，还是column）类型分别送入对应的BiLSTM中，并concatenate两端的hidden state。将得到的节点表示进行stack组成初始节点embedding矩阵$X^0\in \mathbb{R}^{|V^n|\times d}$。</p>
+<h3 id="3-1-2-PLM"><a href="#3-1-2-PLM" class="headerlink" title="3.1.2 PLM"></a>3.1.2 PLM</h3><p>使用预训练模型时，我们首先将所有的question和schema中的名字组成一个序列</p>
+<script type="math/tex; mode=display">
+[CLS]q_1​q_2​⋯q_{∣Q∣}​[SEP]t_{10}​t_1​c_{10}^{t_1}​​c_1^{t_1}​​c_{20}^{t_1}​​c_2^{t_1}​​⋯t_{20}​t_2​c_{10}^{t_2}​​c_1^{t_2}​​c_{20}^{t_2}​​c_2^{t_2}​​⋯[SEP]</script><p>其中类型信息$t_{i0}$和$c_{j0}$被插入到schema item之前。由于每个word都被分词成subword-level，所以要获取每个word的表示向量需要再加入一个subword attentive pooling layer来获取word的表示。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192050320.png" alt="image-20220419205050282"></p>
+<p>其计算过程与attention的计算差别不大。获得每个word的词表示后，也分别将它们按照所属部分类型分别送入对应的BiLSTM中，并concatenate两端的hidden state。将得到的节点表示进行stack组成初始节点embedding矩阵$X^0\in \mathbb{R}^{|V^n|\times d}$。</p>
+<h2 id="3-2-Line-Graph-Enhanced-Hidden-Module"><a href="#3-2-Line-Graph-Enhanced-Hidden-Module" class="headerlink" title="3.2 Line Graph Enhanced Hidden Module"></a>3.2 Line Graph Enhanced Hidden Module</h2><p>包含 L 个堆叠的 <strong>dual relational graph attention network</strong> <strong>（Dual RGAT）</strong> 层</p>
+<ul>
+<li>在每个层 $l$ 中含有两个 RGAT模块分别捕获 <strong>original graph</strong> 和 <strong>line graph</strong> 的结构信息。</li>
+<li>每个图中的节点embedding都表示了对偶图中的边的特征信息。在这两个图中，一个图的 <strong>node embeddings</strong> 在另外的一个图中充当 <strong>edge features</strong> <strong>（边的特征）</strong>。例如， <strong>original graph</strong> $G^{n}$中的边的特征是由 <strong>line graph</strong> $G^{e}$中的 <strong>node embeddings</strong> 提供的。下图中节点图$G^{n}$使用的边特征 z （边1-4和2-4）来源于线图中对应的“节点”特征。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192100710.png" alt=""></p>
+<ul>
+<li>我们使用$\mathbb{X}^{l}\in \mathbb{R}^{|V^{n}|\times d}$来代表<strong>original graph</strong> $G^{n}$ 在第 $l$ 层的RGAT的 <strong>node embedding</strong> 输入矩阵，对于 $v_{i}^{n}$ 节点，我们的 <strong>embedding</strong> 用 $x_{i}^{l}$ 表示。</li>
+<li>相同地，使用 $\mathbb{Z}^{l}\in \mathbb{R}^{|V^{e}|\times d}$  以及 $z_{i}^{l}$ 来代表 <strong>line graph</strong> $G^{e}$ 的节点（这里指局部关系，即一跳邻居）</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192101671.png" alt="image-20220419210125632"></p>
+<ul>
+<li>其中，$\mathbb{Z}_{nlc}$ 代表 <strong>original graph</strong> $G^{n}$ 的非局部边特征。</li>
+<li>用上面公式可以看出，计算 <strong>original graph</strong> $G^{n}$ 的表示 $\mathbb{X}^{l}\in \mathbb{R}^{|V^{n}|\times d}$ 时会考虑局部和非局部关系；而在计算 <strong>line graph</strong> $G^{e}$ 的表示 $\mathbb{Z}^{l}\in \mathbb{R}^{|V^{e}|\times d}$ 时只考虑局部关系。</li>
+</ul>
+<h3 id="3-2-1-RGAT-for-the-Original-Graph"><a href="#3-2-1-RGAT-for-the-Original-Graph" class="headerlink" title="3.2.1 RGAT for the Original Graph"></a>3.2.1 RGAT for the Original Graph</h3><p>这一部分的作用是在<strong>计算节点的表示时增加邻居节点以及对应边的信息</strong>。</p>
+<p>给定 <strong>original graph</strong>  $G^{n}$ ，第 $l$ 层的输出 $x_{i}^{l+1}$ 的计算方式如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192106109.png" alt="image-20220419210619058"></p>
+<ul>
+<li>∣∣ 表示拼接操作，H是head 的数量，FFN()代表 <strong>feedforward neural network</strong>。</li>
+<li>$N_i^n$ 代表节点 $v_{i}^{n}$ 的 <strong>receptive field</strong>（<strong>感受野，应该是指跟 $i$ 节点相连的节点</strong>）</li>
+<li>$\psi(r^n_{ij})$会返回一个表示 $r_{ji}^{n}$ 的 $d$ 维向量（这个向量代表了 <strong>line graph</strong> $G^{e}$ 中的一个节点，因为 $G^{e}$ 中的节点是 $G^{n}$ 中的边）</li>
+<li>$[.]_h^H$ 操作首先将向量平均分割为 Ｈ个部分并返回第ｈ个分区，由于<strong>Line Graph</strong>的构建只利用了1阶连接关系，对于节点图中的高阶邻域，论文采取<strong>静态动态混合特征</strong>或<strong>多头多视图拼接</strong>的方法，将更远的节点及其边类型引入到节点图中对节点特征的更新中，这些包含远距离信息的边特征不会迭代更新，仅仅使用静态参数初始化。</li>
+</ul>
+<p><strong>Mixed Static and Dynamic Embeddings</strong>　(混合静态和动态嵌入)</p>
+<ul>
+<li>如果 $r_{ji}^{n}$ 是一个局部关系（一跳邻居），$\psi (r_{ji}^{n})$ 会从 <strong>line graph</strong> $G^{e}$ 中返回对应节点的 <strong>embedding</strong>  $z_{f(j,i)}^{l}$。</li>
+<li>否则，$\psi (r_{ji}^{n})$ 会返回非局部关系矩阵 $\mathbb{Z}_{nlc}$ 中对应的向量。</li>
+<li>邻居函数 $N_{i}^{n}$ 会返回节点 $v_{i}^{n}$ 的所有邻居节点的集合 $V^{n}$ ，这个集合在所有的<strong>head</strong>都是共享的。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192119355.png" alt="image-20220419211959304"></p>
+<p><strong>Multi-head Multi-view Concatenation</strong> （多头多视图拼接）</p>
+<ul>
+<li>将<strong>多头注意力模块</strong>分成两部分。</li>
+<li>一半的 <strong>head</strong> 中，邻居函数 $N_{i}^{n}$ 会返回节点 $v_{i}^{n}$ 的一跳邻居的集合。在这种方法中，$\psi (r_{ji}^{n})$ 会按照从第  $l$ 层获取的 $Z^{l}$ 中取得对应节点的特征 $z_{f(j,i)}^{l}$（在这一部分，每个节点只接受相邻的节点信息）</li>
+<li>另外一半的 <strong>head</strong> 中，每个节点都可以接触到局部和非局部的邻居，$\psi (.)$会从嵌入矩阵 $\mathbb{Z}_{nlc}\cup \mathbb{Z}^{0}$ 中获取静态的特征embedding。</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192127421.png" alt=""></p>
+<p><strong>RGAT模块</strong> 对 <strong>局部</strong> 和 <strong>非局部</strong> 关系的处理是不同的，相对来说，对局部边特征的处理更仔细。</p>
+<h3 id="3-2-2-RGAT-for-the-Line-Graph"><a href="#3-2-2-RGAT-for-the-Line-Graph" class="headerlink" title="3.2.2 RGAT for the Line Graph"></a>3.2.2 RGAT for the Line Graph</h3><p>这一部分的作用是在<strong>计算边的表示时加入边的两端的节点信息以及相邻边的信息</strong>。</p>
+<p>计算方式跟上面类似，这里不再细说</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192129000.png" alt="image-20220419212947947"></p>
+<ul>
+<li>$\psi (r_{ji}^{e})$ 返回 $G^{e}$ 中边 $r_{ji}^{e}$ 的特征向量，即返回 $G^{e}$ 中节点  $v^{e}_{i}$ 的对应于 $G^{n}$ 中的有向边的起始节点的 <strong>embeddings</strong>（举个例子，在下图中，$\phi(r_{e1 e2}^{e}$) 会返回 <strong>original graph</strong> 中两个圆圈的那个节点的 <strong>embeddings</strong> ）</li>
+</ul>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204191844962.png" alt=""></p>
+<ul>
+<li>因为我们只在 <strong>line graph</strong> 中考虑局部信息，所以 $N_{i}^{e}$ 只包含 1跳邻居。</li>
+<li>还有另外的一点需要注意，在这一部分，边的特征 $r_{ji}^{e}$ 被放在了 <strong>attention</strong> 的 <strong>query</strong> 部分而不是 <strong>key</strong> 部分,因为计算attention分数  $\tilde{\beta}_{ji}^{h}$ 时，跟起始节点 $j$ 是无关的。</li>
+</ul>
+<blockquote>
+<p>因为在<strong>attention</strong>中，算的是<strong>Q</strong>对<strong>K</strong>的相似度，如果放在key部分，则算的是起始节点 $j$ 对目标节点 $i$ 的相似度，但是在 line graph 中，如下图，(1-4,4-5)和(2-4,4-5)中间的边都表示原图中的4号节点，如果不换位置，则算的是1-4以及2-4对4-5的相似度，但是不管相似度哪个大，都是表示4号节点；再举个现实生活中的例子，两个男生追一个女生，哪个男生能追到女生并不是看哪个男生更喜欢女生，而是看女生更喜欢哪个男生。</p>
+</blockquote>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192136211.png" alt="在这里插入图片描述"></p>
+<h2 id="3-3-Graph-Output-Module"><a href="#3-3-Graph-Output-Module" class="headerlink" title="3.3 Graph Output Module"></a>3.3 Graph Output Module</h2><p>该模块包括两个任务:一个用于 text-to-SQL 的 <strong>decoder</strong>，另一个用于执行称为 <strong>graph pruning</strong>（图剪枝）的辅助任务。</p>
+<p>我们使用下标表示具有特定类型的 <strong>node embeddings</strong> 集合，例如， $X_{q}$ 表示所有 <strong>question</strong> 的 <strong>node embeddings</strong> 的矩阵。</p>
+<h3 id="3-3-1-Text-to-SQL-Decoder"><a href="#3-3-1-Text-to-SQL-Decoder" class="headerlink" title="3.3.1 Text-to-SQL Decoder"></a>3.3.1 Text-to-SQL Decoder</h3><p>Decoder部分采用的是与RATSQL一致的grammar-based syntactic neural decoder来首先生成AST，然后再由AST语法树生成SQL语句。</p>
+<h3 id="3-3-2-Graph-Prunning"><a href="#3-3-2-Graph-Prunning" class="headerlink" title="3.3.2 Graph Prunning"></a>3.3.2 Graph Prunning</h3><p>一个强大的<strong>编码器</strong>应该将不相关的 <strong>schema items(模式项目)</strong> 与目标查询中使用的 <strong>golden schema items</strong>(正确的schema items) 区分开来(意思是把SQL查询中没有用到的items排除)。</p>
+<p>在 图6 中，面向问题的模式子图（在阴影区域的上方）可以很容易地被提取出来。意图(要select的) c2 和约束(限制select的) c5 通常在问题中被明确提及，通过 <strong>attention机制</strong> 或 <strong>schema linking(模式链接)</strong> 确定。连接节点如t1、c3、c4、t2可以通过模式图的 1跳 连接来推断，形成一个连接的组件</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192142519.png" alt="image-20220419214240455"></p>
+<p>为了引入这种归纳性偏见，我们设计了一个辅助任务，根据<strong>schema node</strong>与问题的相关性和模式图的稀疏结构来决定对<strong>schema node</strong>进行分类。</p>
+<p>首先,我们用 <strong>question</strong> 的 <strong>node embeddings </strong> $X_{q}$ 以及 <strong>schema</strong> 的 <strong>node embeddings</strong> $s_{i}$ 来计算两者的 <strong>attention</strong> , 目的是用来获取 <strong>context vector</strong>  $\tilde{x}_{s_{i}}$。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192144322.png" alt="image-20220419214436270"></p>
+<p>然后，使用 <strong>biaffine binary classifier(二元二进制分类器)</strong> 来确定 <strong>context vector</strong>  $\tilde{x}_{s_{i}}$ 和 <strong>schema</strong> 的 <strong>node embeddings</strong>  $s_{i}$ 是否是相互关联的。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192145648.png" alt="image-20220419214524612"></p>
+<p>如果 <strong>schema</strong> 的 <strong>node embeddings</strong>  $s_{i}$ 出现在<strong>目标SQL</strong>语句中,<strong>schema item</strong> 的 <strong>label</strong>  $y_{s_{i}}^{g}$ 会是 1,使用交叉熵来计算 <strong>loss</strong>。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192146677.png" alt="image-20220419214651627"></p>
+<p>这个任务和主任务一同进行<strong>多任务学习</strong>，对提升主任务效果比较大。</p>
+<h1 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h1><h2 id="主要结果"><a href="#主要结果" class="headerlink" title="主要结果"></a>主要结果</h2><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192148745.png" alt="image-20220419214826695"></p>
+<p>实验结果见上图，可以看到无论是使用PLM还是Glove，模型都取得了领先于之前最好的模型的表现。在各个分组的性能如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192149191.png" alt="image-20220419214916140"></p>
+<h2 id="消融实验"><a href="#消融实验" class="headerlink" title="消融实验"></a>消融实验</h2><h3 id="LGESQL不同的组件的实验表现"><a href="#LGESQL不同的组件的实验表现" class="headerlink" title="LGESQL不同的组件的实验表现"></a>LGESQL不同的组件的实验表现</h3><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192150541.png" alt="image-20220419215004491"></p>
+<p>可以看到使用Line graph比不使用性能普遍高出1个百分点。而且<strong>Non-local relation</strong>是比较重要的。同时，多任务学习的<strong>Graph pruning</strong>模块也对最后结果有着不错的促进作用。</p>
+<h3 id="预训练模型的影响"><a href="#预训练模型的影响" class="headerlink" title="预训练模型的影响"></a>预训练模型的影响</h3><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192151138.png" alt="image-20220419215116077"></p>
+<p>实验显示使用ELECTRA比BERT的效果要好。</p>
+<h3 id="案例研究"><a href="#案例研究" class="headerlink" title="案例研究"></a>案例研究</h3><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192151643.png" alt="image-20220419215154593"></p>
+<h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>在本工作中，我们利用Line graph来更新异质图中的边特征，用于Text-to-SQL的任务。通过对Line graph中的结构连接的迭代，局部边可以结合多跳关系特征并捕获重要的meta-path。通过进一步集成非本地关系，编码器可以从多个视图学习，并使用快捷方式关注远程节点。在未来，我们将研究更多有用的meta-path，并探索更有效的方法来处理不同的基于meta-path的邻居。</p>
+<p><strong>本文的贡献在于提出了利用对偶图来获取边的局部信息</strong></p>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="局部和非局部关系"><a href="#局部和非局部关系" class="headerlink" title="局部和非局部关系"></a>局部和非局部关系</h2><p>实验中用到的所有局部关系如下：</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192154160.png" alt="image-20220419215417083"></p>
+<p>其中作者保留了NO-MATCH关系。</p>
+<h2 id="Text-to-SQL-Decoder的细节"><a href="#Text-to-SQL-Decoder的细节" class="headerlink" title="Text-to-SQL Decoder的细节"></a>Text-to-SQL Decoder的细节</h2><h3 id="ASDL-Grammar"><a href="#ASDL-Grammar" class="headerlink" title="ASDL Grammar"></a>ASDL Grammar</h3><p>所使用的ASDL语法如下</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192155294.png" alt="image-20220419215523213"></p>
+<h3 id="Decoder架构"><a href="#Decoder架构" class="headerlink" title="Decoder架构"></a>Decoder架构</h3><p>Decoder中使用了一种新型的LSTM叫ON-LSTM，可以将结构信息考虑在内，详情参考<a target="_blank" rel="noopener" href="https://www.linkresearcher.com/theses/54a0ba37-b625-4200-9065-5120b94933b1">ICLR 2019最佳论文 | ON-LSTM：用有序神经元表达层次结构</a>。</p>
+<h3 id="Graph-pruning"><a href="#Graph-pruning" class="headerlink" title="Graph pruning"></a>Graph pruning</h3><p>这里作者做了一个实验，比较共享多少层给两个任务效果最好，结果发现直接多任务学习即共享所有层效果最佳。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202204192157271.png" alt="image-20220419215709212"></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2106.01093v3">LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43829169/article/details/121678305?ops_request_misc=%7B%22request%5Fid%22%3A%22165000849416780264019897%22%2C%22scm%22%3A%2220140713.130102334.pc%5Fall.%22%7D&amp;request_id=165000849416780264019897&amp;biz_id=0&amp;utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_ecpm_v1~rank_v31_ecpm-2-121678305.142^v9^control,157^v4^control&amp;utm_term=+Line+Graph+Enhanced+Text-to-SQL+Model+with+Mixed+Local+and+Non-Local+Relations&amp;spm=1018.2226.3001.4187">LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations 论文笔记_weixin_43829169的博客-CSDN博客</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011426236/article/details/119392517">论文笔记：LGESQL: Line Graph Enhanced Text-to-SQL Model with Mixed Local and Non-Local Relations_11好好学习，天天向上的博客-CSDN博客</a></li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">MCZ</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://mcz777.github.io/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">https://mcz777.github.io/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://mcz777.github.io" target="_blank">养猫的少年~</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">S2SQL阅读笔记</div></div></a></div><div class="next-post pull-right"><a href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="next-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">RAT-SQL阅读笔记</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">MCZ</div><div class="author-info__description">一个初学者</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mcz777"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/mcz777" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:mchangzhe@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://www.zhihu.com/people/mcz-2" target="_blank" title="Zhihu"><i class="fab fa-zhihu"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-number">1.</span> <span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Introduction"><span class="toc-number">2.</span> <span class="toc-text">1. Introduction</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Preliminaries"><span class="toc-number">3.</span> <span class="toc-text">2. Preliminaries</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-Problem-definition"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 Problem definition</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Meta-path"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 Meta-path</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Line-Graph"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 Line Graph</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Method"><span class="toc-number">4.</span> <span class="toc-text">3. Method</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-Graph-Input-Module"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 Graph Input Module</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-1-Glove"><span class="toc-number">4.1.1.</span> <span class="toc-text">3.1.1 Glove</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-2-PLM"><span class="toc-number">4.1.2.</span> <span class="toc-text">3.1.2 PLM</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-Line-Graph-Enhanced-Hidden-Module"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 Line Graph Enhanced Hidden Module</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-1-RGAT-for-the-Original-Graph"><span class="toc-number">4.2.1.</span> <span class="toc-text">3.2.1 RGAT for the Original Graph</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-2-RGAT-for-the-Line-Graph"><span class="toc-number">4.2.2.</span> <span class="toc-text">3.2.2 RGAT for the Line Graph</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-Graph-Output-Module"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 Graph Output Module</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-1-Text-to-SQL-Decoder"><span class="toc-number">4.3.1.</span> <span class="toc-text">3.3.1 Text-to-SQL Decoder</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-2-Graph-Prunning"><span class="toc-number">4.3.2.</span> <span class="toc-text">3.3.2 Graph Prunning</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%9E%E9%AA%8C"><span class="toc-number">5.</span> <span class="toc-text">实验</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E7%BB%93%E6%9E%9C"><span class="toc-number">5.1.</span> <span class="toc-text">主要结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C"><span class="toc-number">5.2.</span> <span class="toc-text">消融实验</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LGESQL%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BB%84%E4%BB%B6%E7%9A%84%E5%AE%9E%E9%AA%8C%E8%A1%A8%E7%8E%B0"><span class="toc-number">5.2.1.</span> <span class="toc-text">LGESQL不同的组件的实验表现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A2%84%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="toc-number">5.2.2.</span> <span class="toc-text">预训练模型的影响</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A1%88%E4%BE%8B%E7%A0%94%E7%A9%B6"><span class="toc-number">5.2.3.</span> <span class="toc-text">案例研究</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-number">6.</span> <span class="toc-text">结论</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%99%84%E5%BD%95"><span class="toc-number">7.</span> <span class="toc-text">附录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B1%80%E9%83%A8%E5%92%8C%E9%9D%9E%E5%B1%80%E9%83%A8%E5%85%B3%E7%B3%BB"><span class="toc-number">7.1.</span> <span class="toc-text">局部和非局部关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Text-to-SQL-Decoder%E7%9A%84%E7%BB%86%E8%8A%82"><span class="toc-number">7.2.</span> <span class="toc-text">Text-to-SQL Decoder的细节</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ASDL-Grammar"><span class="toc-number">7.2.1.</span> <span class="toc-text">ASDL Grammar</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decoder%E6%9E%B6%E6%9E%84"><span class="toc-number">7.2.2.</span> <span class="toc-text">Decoder架构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Graph-pruning"><span class="toc-number">7.2.3.</span> <span class="toc-text">Graph pruning</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">8.</span> <span class="toc-text">参考</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"/></a><div class="content"><a class="title" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题">服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题</a><time datetime="2025-02-19T10:26:15.000Z" title="发表于 2025-02-19 18:26:15">2025-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="BRIDGE阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记">BRIDGE阅读笔记</a><time datetime="2022-05-06T07:26:15.000Z" title="发表于 2022-05-06 15:26:15">2022-05-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="S2SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记">S2SQL阅读笔记</a><time datetime="2022-05-05T07:43:01.000Z" title="发表于 2022-05-05 15:43:01">2022-05-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LGESQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记">LGESQL阅读笔记</a><time datetime="2022-04-15T13:38:21.000Z" title="发表于 2022-04-15 21:38:21">2022-04-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RAT-SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记">RAT-SQL阅读笔记</a><time datetime="2022-04-12T01:51:14.000Z" title="发表于 2022-04-12 09:51:14">2022-04-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2025 By MCZ</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

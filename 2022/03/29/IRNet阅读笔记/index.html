@@ -1,0 +1,274 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IRNet阅读笔记 | 养猫的少年~</title><meta name="keywords" content="-[论文阅读] -[Text2SQL]"><meta name="author" content="MCZ"><meta name="copyright" content="MCZ"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="1. 提出问题Mismatch problem： SQL本身的设计目的是为了准确地向数据库传达执行细节，因此会有与自然言语（后面缩写为NL）表达不一致的地方。比如下例中，FROM、GROUP BY和HAVING等语句，在NL中并没有直接表达出，需要根据问题与表结构才能推断得出。  Lexical problem：Spider数据集跨越不同领域，测试数据的schema中有大量（~35%）的词从未在训">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IRNet阅读笔记">
+<meta property="og:url" content="https://mcz777.github.io/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="养猫的少年~">
+<meta property="og:description" content="1. 提出问题Mismatch problem： SQL本身的设计目的是为了准确地向数据库传达执行细节，因此会有与自然言语（后面缩写为NL）表达不一致的地方。比如下例中，FROM、GROUP BY和HAVING等语句，在NL中并没有直接表达出，需要根据问题与表结构才能推断得出。  Lexical problem：Spider数据集跨越不同领域，测试数据的schema中有大量（~35%）的词从未在训">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg">
+<meta property="article:published_time" content="2022-03-29T13:32:25.000Z">
+<meta property="article:modified_time" content="2022-04-08T03:00:44.665Z">
+<meta property="article:author" content="MCZ">
+<meta property="article:tag" content="-[论文阅读] -[Text2SQL]">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://mcz777.github.io/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'IRNet阅读笔记',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-04-08 11:00:44'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if (GLOBAL_CONFIG_SITE.isHome && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">养猫的少年~</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 清单</span><i class="fas fa-chevron-down expand"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/lovetree/"><i class="fa-fw fas fa-tree"></i><span> 爱情树</span></a></div><div class="menus_item"><a class="site-page" href="/artitalk/"><i class="fa-fw fas fa-comment-dots"></i><span> 说说</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">IRNet阅读笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-03-29T13:32:25.000Z" title="发表于 2022-03-29 21:32:25">2022-03-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-04-08T03:00:44.665Z" title="更新于 2022-04-08 11:00:44">2022-04-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Text2SQL/">-[论文阅读] -[Text2SQL]</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>6分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="IRNet阅读笔记"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="1-提出问题"><a href="#1-提出问题" class="headerlink" title="1. 提出问题"></a>1. 提出问题</h1><p><strong>Mismatch problem</strong>： SQL本身的设计目的是为了准确地向数据库传达执行细节，因此会有与自然言语（后面缩写为NL）表达不一致的地方。比如下例中，FROM、GROUP BY和HAVING等语句，在NL中并没有直接表达出，需要根据问题与表结构才能推断得出。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/image-20220329215521974.png" alt="image-20220329215521974"></p>
+<p><strong>Lexical problem</strong>：Spider数据集跨越不同领域，测试数据的schema中有大量（~35%）的词从未在训练集中出现，这要求模型有更好的泛化性。</p>
+<h1 id="2-IRNet的思路"><a href="#2-IRNet的思路" class="headerlink" title="2. IRNet的思路"></a>2. IRNet的思路</h1><h2 id="2-1-引入中间表示层SemQL"><a href="#2-1-引入中间表示层SemQL" class="headerlink" title="2.1 引入中间表示层SemQL"></a>2.1 引入中间表示层SemQL</h2><p>为解决Mismatch的问题，设计了一种特定于领域的语言SemQL，作为NL和SQL之间的中间表示。让SemQL和NL之间有更好的映射关系，而SQL可以根据语法规则从SemQL推断生成。</p>
+<p>SemQL将GROUPBY,HAVING and FROM clauses都去掉，WHERE和HAVING这些conditions都被统一到Filter关键字。这些操作在之后的推断阶段能够确定性地转换将其转换成SQL。先来举个例子说一下为什么是确定性的呢，例如GROUPBY从句后边跟着的column通常是SELECT从句后边的column 或者 该column是表的主键，在这个表中一个聚合函数被应用到这个表的一个column中。每个C都有一个T对应，这样能够有效的防止多个表中有相同的column name。<img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/无标题_看图王.png" alt="SemQL语法"></p>
+<p>上图左边是<strong>SemQL的语法结构</strong>，Z是根节点，R表示一个SQL单句，如”Select Filter“表示当前的SQL单句里包含有SELECT和WHERE两个语句。Order和Superlative与SQL中的ORDER BY对应，其中Superlative可以映射到ORDER BY + LIMIT。比如成绩最高的5个人，最后在SQL中表达为ORDER BY grade desc LIMIT 5。</p>
+<p>上图右边是从图1中NL对应的SemQL。</p>
+<h2 id="2-2-模式链接Schema-Linking"><a href="#2-2-模式链接Schema-Linking" class="headerlink" title="2.2 模式链接Schema Linking"></a>2.2 模式链接Schema Linking</h2><p><strong>任务目标</strong>：识别问题中提到的columns 和 tables，并且根据问题中提及的方式给每个columns赋予不同的类型（Table、Column、Value）。</p>
+<p><strong>识别的方式为字符串匹配</strong>：用n-grams枚举出所有可能的单词组合，其中n的取值为1~6。如果ngram可以完全匹配或者部分匹配上某个Column的名称，则识别为Column。用同样的方法识别Table。如果某个n-grams同时被识别为Column和Table，那么默认它是一个Column。识别完成后，Questions会被分成各个Span（分段），每个Span会进一步标识一个具体的类别，如Column、Table、None等。对于被识别为列的span，如果它们与模式中的列名完全匹配，为这些列分配 EXACT MATCH类型，否则分配 PARTIAL MATCH类型。</p>
+<p><strong>Value的识别</strong>：论文中没有用到<strong>DB Content</strong>，而是使用<strong>ConceptNet</strong>。如果n-gram开始和结束都是引号，则默认为database中的value。把Value Span到ConceptNet中进行查询，找到对应的Concept再来跟Column Name对比，如果能匹配上，就能确定Value和Column之间的对应关系。比如，“Masters”是一种“Degree”，如果Column中有“Degree”，那么“Masters”就会被认为是Degree Column的一个枚举值。</p>
+<p>这里留下一个改进的空间：使用DB Content可以提升Column和Value的识别能力。而在实际应用中，不少情况下DB Content是可以获取的，只是有一定的资源开销。</p>
+<h2 id="2-3-模型"><a href="#2-3-模型" class="headerlink" title="2.3 模型"></a>2.3 模型</h2><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/20220329222525.png" alt="模式连接"></p>
+<p><strong>输入</strong>：</p>
+<ul>
+<li>问题Natural Language（Figure4的最下面）</li>
+<li>数据库模式A database schema （Figure4的最上面左边）</li>
+<li>模式链接结果The schema linking results（Figure4的最上面右边）</li>
+</ul>
+<p>为了解决the lexical problem，将schema linking的结果应用到NL和Schema中。设计了a memory augmented pointer network去 select columns，这个network决定是从memory中选择column还是从schema of database中选择。</p>
+<p><strong>NL Encoder</strong>：<strong>对Question进行编码。</strong>把Question按照Schema Linking分成不同的Spans；把每个Span中word的embedding及Span类型的embedding求平均后作为Span的embedding；在所有span的embedding之上，用一个Bi-LSTM进行编码后，将隐层作为输出。</p>
+<p><strong>Schema Encoder：对Database Schema进行编码。</strong>（a）把Schema中Column words的embedding取平均作为初始表示；（b）在span embedding的基础上用attention得到context vector；（c）把column type也转化为一个embedding vecotr。以上（a）、（b）、（c）相加得到schema encoder。</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+g_{k}^{i}&=\frac{(\hat{e_{c}}^{i})^{T}e^{k}_x}{||\hat{e_{c}}^{i}||||e^{k}_x||} \\
+c_{c}^{i}&=\sum_{k=1}^{L}g_{k}^{i}e_{x}^{k} \\
+e_{c}^{i}&=\hat{e_{c}}^{i}+c_{c}^{i}+\varphi_{i}
+\end{align*}</script><p><strong>Decoder：生成SemQL。</strong> 此处IRNet定义了三种不同类型的操作——$APPLYRULE、SELECTCOLUMN、SELECTTABLE$。APPLYRULE选择特定的规则生成语法树，而SELECTCOLUMN和SELECTTABLE选择相应的column或table进行填充。</p>
+<p>为了提升模型的准确率，IRNet使用了memory机制和coarse-to-fine的形式。（1）<strong>Memory：帮助细化column的选择机制。</strong>当一个column被选择后，将会把这个column从schema中移除，同时记录在memory中。下次当这个column再次出现，算法将决定是从scheam中进行选择，还是从memory中进行选择。（2）<strong>Coarse-to-fine：分两阶段由粗到细生成SemQL。</strong>第一阶段生成一个SemQL查询的skeleton，第二阶段通过选择column和table在skeleton中填入细节，执行过程如下图所示。</p>
+<p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/20220330180519.png" alt="coarsetofine"></p>
+<h1 id="3-实验"><a href="#3-实验" class="headerlink" title="3. 实验"></a>3. 实验</h1><p><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/20220330223506.png" alt="精确匹配结果"></p>
+<p>IRNet的表现明显优于所有的基线。在测试集上，它比SyntaxSQLNet获得了27.0%的绝对性能提升。与执行大规模数据扩充的SyntaxSQLNet(augment)相比，它也获得了19.5%的绝对改善。当加入BERT时，SyntaxSQLNet和IRNet的性能都得到了很大的提高，它们在开发集和测试集上的精度差距也加大了。</p>
+<p>论文最后进行了错误案例分析。在Dev Set上IRNet共有483个错误预测。<strong>主要分为三类：Column Prediction（占比32.3%），Nested Query（23.9%），Operator（12.4%）</strong>。</p>
+<ul>
+<li>Column Prediction错误：基于字段值（cell value）没能正确找到对应的column。</li>
+<li>Nested Query错误：大部分是由于Extra Hard level的复杂嵌套查询没能准确构造。</li>
+<li>Operator错误：部分operators的选择要求机器有一定常识，如“from old to young”需要把年龄降序排列。</li>
+</ul>
+<p>加入BERT后，Column Prediction和Operator两类错误有所改善。引入BERT进行输入编码的方法如下图所示。同样以Question、Database Schema、Schema Linking Results作为输入。对应每个span取words和type的平均值作为该span的encoding。对Schema，在column每个word上用一个Bi-LSTM输出隐层，加上column type的encoding作为column最后的encoding。</p>
+<p>根据论文描述，一些可能的改进思路：</p>
+<ol>
+<li>改善Column Prediction：现有column的识别基于string-match，如果改为embedding-match应该可以改善column的识别准确率；利用DB Content提升从cell value识别column的能力。</li>
+<li>改善Nested Query：Extra Hard level的训练样本有限，可考虑通过数据增强来提升模型效果。</li>
+<li>对SemQL的改善：继续加强SemQL来改善NL和SQL之间的mismatch部分，解决self join等表达问题。</li>
+</ol>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>1.<a target="_blank" rel="noopener" href="https://arxiv.org/abs/1905.08205"> Towards Complex Text-to-SQL in Cross-Domain Database with Intermediate Representation (arxiv.org)</a></p>
+<p>2.<a target="_blank" rel="noopener" href="https://github.com/zhanzecheng/IRNet">IRNet (github.com)</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">MCZ</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://mcz777.github.io/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/">https://mcz777.github.io/2022/03/29/IRNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://mcz777.github.io" target="_blank">养猫的少年~</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB-Text2SQL/">-[论文阅读] -[Text2SQL]</a></div><div class="post_share"><div class="social-share" data-image="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="prev-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">RAT-SQL阅读笔记</div></div></a></div><div class="next-post pull-right"><a href="/2022/03/24/SyntaxSQLNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/"><img class="next-cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202203291742486.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">SyntaxSQLNet阅读笔记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2021/12/04/X-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="X-SQL阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-04</div><div class="title">X-SQL阅读笔记</div></div></a></div><div><a href="/2022/03/16/HydraNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="HydraNet阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-16</div><div class="title">HydraNet阅读笔记</div></div></a></div><div><a href="/2022/03/24/SyntaxSQLNet%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="SyntaxSQLNet阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://raw.githubusercontent.com/MCZ777/pic/main/img/202203291742486.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-03-24</div><div class="title">SyntaxSQLNet阅读笔记</div></div></a></div><div><a href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-12</div><div class="title">RAT-SQL阅读笔记</div></div></a></div><div><a href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-05</div><div class="title">S2SQL阅读笔记</div></div></a></div><div><a href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记"><img class="cover" src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-05-06</div><div class="title">BRIDGE阅读笔记</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img12.360buyimg.com/ddimg/jfs/t1/161364/3/21565/227101/6177a86fE116955fd/a7820ef9e9969a82.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">MCZ</div><div class="author-info__description">一个初学者</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">11</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/mcz777"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/mcz777" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:mchangzhe@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://www.zhihu.com/people/mcz-2" target="_blank" title="Zhihu"><i class="fab fa-zhihu"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E6%8F%90%E5%87%BA%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 提出问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-IRNet%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="toc-number">2.</span> <span class="toc-text">2. IRNet的思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%BC%95%E5%85%A5%E4%B8%AD%E9%97%B4%E8%A1%A8%E7%A4%BA%E5%B1%82SemQL"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 引入中间表示层SemQL</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E6%A8%A1%E5%BC%8F%E9%93%BE%E6%8E%A5Schema-Linking"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 模式链接Schema Linking</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 模型</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%AE%9E%E9%AA%8C"><span class="toc-number">3.</span> <span class="toc-text">3. 实验</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="toc-number">4.</span> <span class="toc-text">参考文献</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题"/></a><div class="content"><a class="title" href="/2025/02/19/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%BC%80%E8%8D%92%E6%97%A5%E8%AE%B0%EF%BC%88CUDA%E3%80%81cuDNN%E3%80%81nvidia-fabricmaneger%E5%AE%89%E8%A3%85)%E2%80%94%E2%80%93%E8%A7%A3%E5%86%B3nvcc%E3%80%81%E9%A9%B1%E5%8A%A8%E6%AD%A3%E5%B8%B8%EF%BC%8C%E4%BD%86GPU%E6%97%A0%E6%B3%95%E6%AD%A3%E5%B8%B8%E4%BD%BF%E7%94%A8%E9%97%AE%E9%A2%98/" title="服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题">服务器开荒日记（CUDA、cuDNN、nvidia-fabricmaneger安装)—–解决nvcc、驱动正常，但GPU无法正常使用问题</a><time datetime="2025-02-19T10:26:15.000Z" title="发表于 2025-02-19 18:26:15">2025-02-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="BRIDGE阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/06/BRIDGE%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="BRIDGE阅读笔记">BRIDGE阅读笔记</a><time datetime="2022-05-06T07:26:15.000Z" title="发表于 2022-05-06 15:26:15">2022-05-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="S2SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/05/05/S2SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="S2SQL阅读笔记">S2SQL阅读笔记</a><time datetime="2022-05-05T07:43:01.000Z" title="发表于 2022-05-05 15:43:01">2022-05-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LGESQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/15/LGESQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="LGESQL阅读笔记">LGESQL阅读笔记</a><time datetime="2022-04-15T13:38:21.000Z" title="发表于 2022-04-15 21:38:21">2022-04-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记"><img src= "data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" data-lazy-src="https://img13.360buyimg.com/ddimg/jfs/t1/214765/33/1925/278362/6177a875E49ddcbe8/3775ab944dd859d3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RAT-SQL阅读笔记"/></a><div class="content"><a class="title" href="/2022/04/12/RAT-SQL%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0/" title="RAT-SQL阅读笔记">RAT-SQL阅读笔记</a><time datetime="2022-04-12T01:51:14.000Z" title="发表于 2022-04-12 09:51:14">2022-04-12</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2021 - 2025 By MCZ</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.2
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        insertScript: [200, () => {
+          document.querySelectorAll('mjx-container:not\([display]\)').forEach(node => {
+            const target = node.parentNode
+            if (target.nodeName.toLowerCase() === 'li') {
+              target.parentNode.classList.add('has-jax')
+            } else {
+              target.classList.add('has-jax')
+            }
+          });
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = false;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
